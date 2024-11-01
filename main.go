@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "backend-dating-app/api/docs"
 	"backend-dating-app/api/profile"
 	"backend-dating-app/api/swipe"
 	"backend-dating-app/api/user"
@@ -8,10 +9,21 @@ import (
 	"log"
 	"net/http"
 
+	httpSwagger "github.com/swaggo/http-swagger"
+
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
 
+// @title Dating App API
+// @version 1.0
+// @description API documentation for a dating app with sign-up, login, and swipe functionality.
+// @host localhost:8080
+// @BasePath /
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	dbConn, err := db.ConnectDB()
 	if err != nil {
@@ -42,6 +54,9 @@ func main() {
 	update := protected.PathPrefix("/update").Subrouter()
 	update.HandleFunc("/profile", profileHandler.UpdateProfile).Methods("POST")
 
+	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+
+	log.Println("Run in port :8080")
 	http.ListenAndServe(":8080", r)
 }
 
