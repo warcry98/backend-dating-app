@@ -8,7 +8,7 @@ type Config struct {
 	DBUser     string
 	DBPassword string
 	DBName     string
-	SecretKet  string
+	SecretKey  string
 }
 
 func LoadConfig() Config {
@@ -18,6 +18,6 @@ func LoadConfig() Config {
 		DBUser:     os.Getenv("DB_USER"),
 		DBPassword: os.Getenv("DB_PASSWORD"),
 		DBName:     os.Getenv("DB_NAME"),
-		SecretKet:  os.Getenv("SECRET_KEY"),
+		SecretKey:  os.Getenv("SECRET_KEY"),
 	}
 }

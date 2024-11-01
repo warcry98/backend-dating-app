@@ -12,7 +12,7 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
-func (r *UserRepository) Create(user User) error {
+func (r *UserRepository) CreateUser(user User) error {
 	return r.db.Create(&user).Error
 }
 
