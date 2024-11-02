@@ -24,7 +24,7 @@ func (h *Handler) GetProfiles(w http.ResponseWriter, r *http.Request) {
 
 	profiles, err := h.service.GetProfiles(userID, prefer, currentDate, 10)
 	if err != nil {
-		http.Error(w, "Failed to get ptofiles", http.StatusInternalServerError)
+		http.Error(w, "Failed to get profiles", http.StatusInternalServerError)
 		return
 	}
 

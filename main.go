@@ -1,15 +1,12 @@
 package main
 
 import (
-	_ "backend-dating-app/api/docs"
 	"backend-dating-app/api/profile"
 	"backend-dating-app/api/swipe"
 	"backend-dating-app/api/user"
 	"backend-dating-app/db"
 	"log"
 	"net/http"
-
-	httpSwagger "github.com/swaggo/http-swagger"
 
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
@@ -53,8 +50,6 @@ func main() {
 
 	update := protected.PathPrefix("/update").Subrouter()
 	update.HandleFunc("/profile", profileHandler.UpdateProfile).Methods("POST")
-
-	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	log.Println("Run in port :8080")
 	http.ListenAndServe(":8080", r)

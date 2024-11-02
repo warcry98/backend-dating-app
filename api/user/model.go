@@ -5,7 +5,7 @@ type User struct {
 	Username  string `json:"username" gorm:"unique"`
 	Email     string `json:"email" gorm:"unique"`
 	Prefer    string `json:"prefer"` // male or female
-	Password  string `json:"password"`
+	Password  string `json:"password" gorm:"size:65535"`
 	IsPremium bool   `json:"is_premium" gorm:"default:false"`
 	Verified  bool   `json:"verified" gorm:"default:false"`
 }

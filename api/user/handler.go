@@ -29,29 +29,21 @@ func NewUserHandler(db *gorm.DB) *Handler {
 // @Failure 400 {object} any
 // @Router /auth/register [post]
 func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
-	type Credentials struct {
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		Prefer   string `json:"prefer"`
-		Password string `json:"password"`
-	}
-	var credentials Credentials
-	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, `{"error": "Invalid request payload"}`, http.StatusBadRequest)
 		return
 	}
-
 	creds := User{
-		Username:  credentials.Username,
-		Email:     credentials.Email,
-		Prefer:    credentials.Prefer,
-		Password:  credentials.Password,
+		Username:  r.FormValue("username"),
+		Email:     r.FormValue("email"),
+		Prefer:    r.FormValue("prefer"),
+		Password:  r.FormValue("password"),
 		IsPremium: false,
 		Verified:  false,
 	}
 	err := h.service.Register(creds)
 	if err != nil {
-		http.Error(w, "Failed to create user", http.StatusInternalServerError)
+		http.Error(w, `{"error": "Failed to create user"}`, http.StatusInternalServerError)
 		return
 	}
 
@@ -71,30 +63,30 @@ func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} any
 // @Router /auth/login [post]
 func (h *Handler) LoginUser(w http.ResponseWriter, r *http.Request) {
-	var credentials struct {
+	type Credentials struct {
 		UsernameEmail string `json:"username"`
 		Password      string `json:"password"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
-		return
+	credentials := Credentials{
+		UsernameEmail: r.FormValue("username"),
+		Password:      r.FormValue("password"),
 	}
 
 	user, err := h.service.repo.GetByUsernameOrEmail(credentials.UsernameEmail)
 	if err != nil {
-		http.Error(w, "User not found", http.StatusUnauthorized)
+		http.Error(w, `{"error": "User not found"}`, http.StatusUnauthorized)
 		return
 	}
 
 	err = h.service.VerifyPassword(user.Password, credentials.Password)
 	if err != nil {
-		http.Error(w, "Invalid password", http.StatusUnauthorized)
+		http.Error(w, `{"error": "Invalid password"}`, http.StatusUnauthorized)
 		return
 	}
 
 	token, err := h.service.Login(credentials.UsernameEmail, credentials.Password)
 	if err != nil {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		http.Error(w, `{"error": "Invalid credentials"}`, http.StatusUnauthorized)
 	}
 
 	w.WriteHeader(http.StatusOK)

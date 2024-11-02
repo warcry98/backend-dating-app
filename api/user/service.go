@@ -13,6 +13,12 @@ type UserService struct {
 	repo UserRepository
 }
 
+type UserServiceInterface interface {
+	Register(user User) error
+	Login(username_or_email, password string) (string, error)
+	VerifyPassword(hashedPassword, plainPassword string) error
+}
+
 func NewUserService(repo UserRepository) *UserService {
 	return &UserService{repo: repo}
 }
@@ -32,11 +38,9 @@ func (s *UserService) Login(username_or_email, password string) (string, error) 
 	if err != nil {
 		return "", err
 	}
-	hashedPassword, err := hashPassword(password)
+
+	err = s.VerifyPassword(user.Password, password)
 	if err != nil {
-		return "", err
-	}
-	if user.Password != hashedPassword {
 		return "", errors.New("invalid credentials")
 	}
 
@@ -52,7 +56,7 @@ func (s UserService) VerifyPassword(hashedPassword, plainPassword string) error 
 }
 
 func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	if err != nil {
 		return "", err
 	}
@@ -61,9 +65,11 @@ func hashPassword(password string) (string, error) {
 
 func GenerateJWT(user User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": user.ID,
-		"prefer":  user.Prefer,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
+		"user_id":   user.ID,
+		"prefer":    user.Prefer,
+		"isPremium": user.IsPremium,
+		"verified":  user.Verified,
+		"exp":       time.Now().Add(time.Hour * 24).Unix(),
 	})
 	return token.SignedString([]byte(config.LoadConfig().SecretKey))
 }
